@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Центральная мечеть — Община онлайн</title>
+  <style>
+    :root {
+      --p: #1E5631; --pd: #133A20; --a: #D4AF37;
+      --bg: #F8F9FA; --w: #FFFFFF; --t: #1A1A1A; --tl: #6C757D; --b: #E9ECEF;
+      --sh: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--t); padding-bottom: 20px; }
+    
+    header { background: var(--p); color: white; padding: 16px 20px; position: sticky; top: 0; z-index: 10; box-shadow: var(--sh); }
+    header h1 { font-size: 18px; font-weight: 600; }
+    header p { font-size: 13px; opacity: 0.85; margin-top: 2px; }
+
+    .tabs { display: flex; background: var(--w); border-bottom: 1px solid var(--b); overflow-x: auto; scrollbar-width: none; position: sticky; top: 56px; z-index: 9; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { flex: 0 0 auto; padding: 14px 16px; background: none; border: none; color: var(--tl); font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.2s; border-bottom: 3px solid transparent; white-space: nowrap; }
+    .tab-btn.active { color: var(--p); border-bottom-color: var(--a); background: #F1F8F4; }
+    .tab-btn i { display: block; font-size: 16px; margin-bottom: 2px; text-align: center; }
+
+    .section { display: none; padding: 20px; animation: fade 0.25s ease; }
+    .section.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card { background: var(--w); padding: 16px; border-radius: 12px; box-shadow: var(--sh); margin-bottom: 16px; }
+    .card h3 { color: var(--p); margin-bottom: 10px; font-size: 17px; }
+    .card p { font-size: 14px; color: var(--tl); line-height: 1.5; margin-bottom: 12px; }
+    
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: var(--tl); }
+    .form-control { width: 100%; padding: 12px; border: 1px solid var(--b); border-radius: 8px; font-size: 15px; background: #FAFAFA; }
+    .form-control:focus { outline: none; border-color: var(--p); background: #FFF; }
+    
+    .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s; margin-top: 8px; }
+    .btn-primary { background: var(--p); color: white; }
+    .btn-accent { background: var(--a); color: #111; }
+    .btn-outline { background: transparent; border: 1px solid var(--b); color: var(--tl); }
+    
+    .checkbox-group { display: flex; align-items: flex-start; gap: 10px; margin: 10px 0; }
+    .checkbox-group input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--p); }
+    .checkbox-group label { font-size: 13px; line-height: 1.4; color: var(--tl); }
+    
+    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; color: white; padding: 12px 20px; border-radius: 50px; font-size: 14px; opacity: 0; transition: 0.3s; z-index: 100; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .list-item { padding: 12px; border-bottom: 1px solid var(--b); display: flex; justify-content: space-between; align-items: center; }
+    .list-item:last-child { border-bottom: none; }
+    .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .badge-urg { background: #DC3545; color: white; }
+    .badge-norm { background: var(--a); color: #111; }
+    .badge-day { background: #E8F5E9; color: #2E7D32; }
+
+    .toggle-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .hidden { display: none; }
+
+    footer { background: var(--p); color: white; padding: 25px 20px; text-align: center; margin-top: 30px; }
+    footer h3 { margin-bottom: 10px; font-size: 18px; }
+    footer p { margin: 6px 0; font-size: 14px; opacity: 0.9; }
+    footer a { color: var(--a); text-decoration: none; font-weight: 600; }
+    footer .copy { margin-top: 15px; font-size: 12px; opacity: 0.6; }
+    
+    .lesson-item { display: flex; gap: 15px; padding: 12px 0; border-bottom: 1px solid var(--b); align-items: center; }
+    .lesson-time { font-size: 18px; font-weight: bold; color: var(--p); min-width: 60px; }
+    .lesson-info h4 { font-size: 15px; margin-bottom: 2px; }
+    .lesson-info span { font-size: 13px; color: var(--tl); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 id="site-title">🕌 Центральная мечеть</h1>
+    <p>Расписание, объявления и помощь общине</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="tab('imp', this)"><i>📢</i>Важное</button>
+    <button class="tab-btn" onclick="tab('sched', this)"><i>🕌</i>Расписание</button>
+    <button class="tab-btn" onclick="tab('ift', this)"><i>🍽️</i>Ифтар</button>
+    <button class="tab-btn" onclick="tab('ms', this)"><i>🤝</i>Помощь</button>
+    <button class="tab-btn" onclick="tab('aid', this)"><i>🤲</i>Благотвор.</button>
+    <button class="tab-btn" onclick="tab('don', this)"><i>💝</i>Садака</button>
+    <button class="tab-btn" onclick="tab('nik', this)"><i>💍</i>Никах</button>
+  </nav>
+
+  <main>
+    <!-- 1. ВАЖНОЕ -->
+    <section id="imp" class="section active">
+      <div id="ann-list"><div class="card" style="text-align:center;">📢 Загрузка...</div></div>
+    </section>
+
+    <!-- 2. РАСПИСАНИЕ (НАМАЗЫ + УРОКИ) -->
+    <section id="sched" class="section">
+      <div class="card">
+        <h3>🕌 Расписание намазов</h3>
+        <div id="sched-container">
+          <div style="text-align:center; padding:30px; color:var(--tl);">
+            🕐 Администратор загрузит актуальное расписание
+          </div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h3>📚 Расписание уроков</h3>
+        <div id="lessons-list">
+          <div style="text-align:center; padding:20px; color:var(--tl);">Загрузка расписания...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. ИФТАР -->
+    <section id="ift" class="section">
+      <div class="card" style="background:#FFF3E0; border:1px solid #FFB74D;">
+        <h3 style="color:#E65100; margin:0;">🌙 Рамадан: Запись на Ифтар</h3>
+      </div>
+      <div class="card">
+        <form onsubmit="sub(event, 'iftar')">
+          <div class="form-group"><label>ФИО *</label><input type="text" name="name" class="form-control" required></div>
+          <div class="form-group"><label>Телефон *</label><input type="tel" name="phone" class="form-control" required></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group"><label>Кол-во человек *</label><input type="number" name="count" class="form-control" min="1" value="1" required></div>
+            <div class="form-group"><label>Дата *</label><input type="date" name="date" class="form-control" required></div>
+          </div>
+          <button type="submit" class="btn btn-primary">📝 Записаться</button>
+        </form>
+      </div>
+      <div class="card"><h3>👥 Уже записались</h3><div id="ift-list"><div class="list-item" style="color:var(--tl);">Пока нет записей</div></div></div>
+    </section>
+
+    <!-- 4. МАСТЕРА -->
+    <section id="ms" class="section">
+      <div class="card" style="background:#E8F5E9; border:1px solid #4CAF50;">
+        <h3 style="color:#2E7D32; margin:0;">🤝 Садака Джария своими руками</h3>
+      </div>
+      <div class="card">
+        <p>Не можете помочь деньгами? Предложите свои навыки. <strong>Ваши данные увидит только Администратор мечети.</strong></p>
+        <form onsubmit="sub(event, 'masters')">
+          <div class="form-group"><label>Ваше ФИО *</label><input type="text" name="name" class="form-control" required></div>
+          <div class="form-group"><label>Телефон *</label><input type="tel" name="phone" class="form-control" required></div>
+          <div class="form-group"><label>Профессия / Навык *</label>
+            <select name="prof" class="form-control" required>
+              <option>Электрик</option><option>Сантехник</option><option>Строитель/Отделка</option><option>Уборка/Благоустройство</option><option>IT/Программирование</option><option>Водитель</option><option>Другое</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Что конкретно можете сделать?</label><textarea name="skills" class="form-control" rows="2" placeholder="Например: ремонт проводки, установка дверей..."></textarea></div>
+          <div class="checkbox-group"><input type="checkbox" required><label>Согласен передать контакты только Администратору</label></div>
+          <button type="submit" class="btn btn-accent">🤝 Предложить помощь</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 5. БЛАГОТВОРИТЕЛЬНОСТЬ -->
+    <section id="aid" class="section">
+      <div class="toggle-btns">
+        <button class="btn btn-primary" onclick="aidToggle('req')">🆘 Нужна помощь</button>
+        <button class="btn btn-outline" onclick="aidToggle('off')">❤️ Хочу помочь</button>
+      </div>
+      
+      <div id="aid-req" class="card hidden">
+        <h3>🆘 Запрос помощи</h3>
+        <p style="font-size:13px;">Ваш запрос анонимен для братьев. Контакты видит только Админ.</p>
+        <form onsubmit="sub(event, 'aid')">
+          <input type="hidden" name="type" value="request">
+          <div class="form-group"><label>Что нужно? (Одежда, продукты, быт)</label><textarea name="desc" class="form-control" rows="2" required></textarea></div>
+          <div class="form-group"><label>Ваш телефон (только для Админа)</label><input type="tel" name="phone" class="form-control" required></div>
+          <button type="submit" class="btn btn-primary">🆘 Отправить запрос</button>
+        </form>
+      </div>
+
+      <div id="aid-off" class="card hidden">
+        <h3>❤️ Предложение помощи</h3>
+        <form onsubmit="sub(event, 'aid')">
+          <input type="hidden" name="type" value="offer">
+          <div class="form-group"><label>Что можете дать?</label><textarea name="desc" class="form-control" rows="2" required></textarea></div>
+          <div class="form-group"><label>Ваше имя</label><input type="text" name="name" class="form-control" required></div>
+          <div class="form-group"><label>Ваш телефон</label><input type="tel" name="phone" class="form-control" required></div>
+          <button type="submit" class="btn btn-accent">❤️ Предложить</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 6. ПОЖЕРТВОВАНИЯ -->
+    <section id="don" class="section">
+      <div class="card">
+        <h3>💝 Садака / Закят</h3>
+        <form onsubmit="sub(event, 'donations')">
+          <div class="form-group"><label>Ваше имя</label><input type="text" name="name" class="form-control" placeholder="Аноним"></div>
+          <div class="form-group"><label>Телефон</label><input type="tel" name="phone" class="form-control" required></div>
+          <div class="form-group"><label>Сумма (₽)</label><input type="number" name="amount" class="form-control" min="10" required></div>
+          <div class="form-group"><label>Тип</label>
+            <select name="type" class="form-control"><option>Садака</option><option>Закят</option><option>На ремонт</option><option>Закят аль-Фитр</option></select>
+          </div>
+          <div class="checkbox-group"><input type="checkbox" required><label>Согласен на обработку данных</label></div>
+          <button type="submit" class="btn btn-primary">🤲 Отправить</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 7. НИКАХ -->
+    <section id="nik" class="section">
+      <div class="card">
+        <h3>💍 Заявка на Никах</h3>
+        <form onsubmit="sub(event, 'nikahs')">
+          <div class="form-group"><label>Жених</label><input type="text" name="groom" class="form-control" required></div>
+          <div class="form-group"><label>Невеста</label><input type="text" name="bride" class="form-control" required></div>
+          <div class="form-group"><label>Телефон для связи</label><input type="tel" name="phone" class="form-control" required></div>
+          <div class="form-group"><label>Желаемая дата</label><input type="date" name="date" class="form-control" required></div>
+          <div class="checkbox-group"><input type="checkbox" required><label>Согласен на обработку данных</label></div>
+          <button type="submit" class="btn btn-primary">📝 Подать заявку</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <h3 id="footer-title">🕌 Центральная мечеть</h3>
+    <p id="footer-addr">📍 Адрес не указан</p>
+    <p id="footer-phone">📞 <a href="#">Телефон не указан</a></p>
+    <p class="copy">© 2026 MasjidFlow · Разработано Nizamov.tech</p>
+  </footer>
+
+  <div class="toast" id="toast">✅ Готово</div>
+
+  <script>
+    function tab(id, btn) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+    function aidToggle(type) {
+      document.getElementById('aid-req').classList.toggle('hidden', type !== 'req');
+      document.getElementById('aid-off').classList.toggle('hidden', type !== 'off');
+    }
+
+    const DB = {
+      get: k => JSON.parse(localStorage.getItem(`mf_${k}`) || '[]'),
+      set: (k, v) => { localStorage.setItem(`mf_${k}`, JSON.stringify(v)); render(); }
+    };
+
+    function sub(e, key) {
+      e.preventDefault();
+      const form = e.target;
+      const data = Object.fromEntries(new FormData(form));
+      data.id = Date.now();
+      data.dateAdded = new Date().toISOString();
+      if(key === 'iftar') data.date = form.date.value; 
+      
+      const arr = DB.get(key);
+      arr.unshift(data);
+      DB.set(key, arr);
+      
+      form.reset();
+      toast(`✅ ${key==='iftar'?'Запись принята':key==='masters'?'Баракаллаху!':'Заявка отправлена!'}`);
+      render();
+    }
+
+    function updateContacts() {
+      const name = localStorage.getItem('mf_mosque_name') || 'Центральная мечеть';
+      const addr = localStorage.getItem('mf_mosque_address') || 'Адрес не указан';
+      const phone = localStorage.getItem('mf_mosque_phone') || '';
+      
+      document.getElementById('site-title').textContent = `🕌 ${name}`;
+      document.getElementById('footer-title').textContent = `🕌 ${name}`;
+      document.getElementById('footer-addr').textContent = `📍 ${addr}`;
+      
+      if(phone) {
+        document.getElementById('footer-phone').innerHTML = `📞 <a href="tel:${phone}">${phone}</a>`;
+      } else {
+        document.getElementById('footer-phone').innerHTML = '📞 Телефон не указан';
+      }
+    }
+
+    function render() {
+      const ann = DB.get('announcements');
+      document.getElementById('ann-list').innerHTML = ann.length 
+        ? ann.map(a=>`<div class="card"><span class="badge ${a.urgent?'badge-urg':'badge-norm'}">${a.urgent?'🔥 СРОЧНО':'📢'}</span><h3 style="margin:8px 0 4px;">${a.title}</h3><p>${a.text}</p><small style="color:var(--tl)">📅 ${fmt(a.dateAdded)}</small></div>`).join('')
+        : '<div class="card" style="text-align:center;">Нет новостей</div>';
+
+      const ift = DB.get('iftar');
+      document.getElementById('ift-list').innerHTML = ift.length 
+        ? ift.slice(0,5).map(i=>`<div class="list-item"><span>${i.name}</span><span style="color:var(--tl)">${i.count} чел • ${fmt(i.dateAdded)}</span></div>`).join('')
+        : '<div class="list-item" style="color:var(--tl);">Пока нет записей</div>';
+
+      const schedImg = localStorage.getItem('mf_schedule_image');
+      if (schedImg) {
+        document.getElementById('sched-container').innerHTML = 
+          `<img src="${schedImg}" style="width:100%; border-radius:8px; border:2px solid var(--a);">` +
+          `<p style="font-size:12px; color:var(--tl); margin-top:8px; text-align:center;">` +
+          `📅 Обновлено: ${fmt(localStorage.getItem('mf_schedule_date') || Date.now())}</p>`;
+      }
+
+      // Уроки
+      const lessons = DB.get('lessons');
+      const lessonsDiv = document.getElementById('lessons-list');
+      if (lessons.length === 0) {
+        lessonsDiv.innerHTML = '<p style="text-align:center; color:var(--tl);">Расписание уроков формируется...</p>';
+      } else {
+        lessonsDiv.innerHTML = lessons.map(l => `
+          <div class="lesson-item">
+            <div class="lesson-time">${l.time}</div>
+            <div class="lesson-info">
+              <h4>${l.title}</h4>
+              <span>${l.day} · ${l.teacher}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      updateContacts();
+    }
+
+    function fmt(d) { return new Date(d).toLocaleDateString('ru-RU'); }
+
+    window.addEventListener('storage', render);
+    document.addEventListener('DOMContentLoaded', () => { render(); updateContacts(); });
+  </script>
+</body>
+</html>
