@@ -8,7 +8,7 @@
   <title>🕌 Мечеть — Община онлайн</title>
   
   <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest-user.json">
+  <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   
   <!-- Preconnect for performance -->
@@ -92,19 +92,19 @@
       border-radius: 20px; font-weight: 600; cursor: pointer;
     }
     @keyframes slideUp { from { transform: translateX(-50%) translateY(20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
-    /* Подсветка следующего намаза */
-.prayer-time {
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.prayer-time.next-prayer {
-  background: var(--a);
-  color: #111;
-  font-weight: 700;
-  box-shadow: 0 2px 8px rgba(212,175,55,0.4);
-}
+    
+    /* 🔹 Подсветка следующего намаза */
+    .prayer-time {
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+    .prayer-time.next-prayer {
+      background: var(--a);
+      color: #111;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
   </style>
 </head>
 <body>
@@ -114,41 +114,53 @@
     <p>Расписание, объявления и помощь общине</p>
   </header>
 
-  <!-- 🔹 ОБНОВЛЁННЫЕ ВКЛАДКИ: расписание первым, хутба добавлена, ифтар скрыт, никах убран -->
+  <!-- 🔹 ОБНОВЛЁННЫЕ ВКЛАДКИ -->
   <nav class="tabs">
     <button class="tab-btn active" onclick="tab('sched', this)"><i>🕌</i>Намаз</button>
     <button class="tab-btn" onclick="tab('imp', this)"><i>📢</i>Важное</button>
     <button class="tab-btn" onclick="tab('khutbah', this)"><i>📖</i>Хутба</button>
     <button class="tab-btn" onclick="tab('ms', this)"><i>🤝</i>Волонтёры</button>
     <button class="tab-btn" onclick="tab('aid', this)"><i>🤲</i>Благотвор.</button>
-    <button class="tab-btn" onclick="tab('don', this)"><i>💝</i>Садака</button>
-    <!-- 🌙 Ифтар скрыт до Рамадана: раскомментируйте за 10 дней до начала -->
+    <!-- 💝 Садака/Закят убран — нет платежки -->
+    <!-- 🌙 Ифтар скрыт до Рамадана -->
     <!-- <button class="tab-btn" onclick="tab('ift', this)"><i>🍽️</i>Ифтар</button> -->
   </nav>
 
   <main>
-    <!-- 🔹 1. РАСПИСАНИЕ НАМАЗОВ — ПЕРВЫЙ ЭКРАН + РЕДИРЕКТ -->
+    <!-- 🔹 1. РАСПИСАНИЕ НАМАЗОВ — ПЕРВЫЙ ЭКРАН + ДИНАМИЧЕСКОЕ ВРЕМЯ -->
     <section id="sched" class="section active">
-      <!-- 🔗 Карточка-редирект на Намаз Челябинск -->
       <div class="card" style="border:2px solid var(--a); background:#FFFBF0; text-align:center;">
         <h3 style="color:#8B7500; margin:0 0 8px;">🕋 Время намазов на сегодня</h3>
+        
+        <!-- 🔹 Динамические времена с id для JS -->
         <div style="display:flex; justify-content:center; gap:12px; margin:15px 0; font-weight:600; color:var(--p); flex-wrap:wrap;">
-          <span>Фаджр 05:12</span><span style="opacity:0.5">•</span><span>Зухр 12:45</span><span style="opacity:0.5">•</span><span>Аср 16:10</span><span style="opacity:0.5">•</span><span>Магриб 19:30</span><span style="opacity:0.5">•</span><span>Иша 20:55</span>
+          <span class="prayer-time">Фаджр <span id="fajr-time">--:--</span></span>
+          <span style="opacity:0.5">•</span>
+          <span class="prayer-time">Зухр <span id="dhuhr-time">--:--</span></span>
+          <span style="opacity:0.5">•</span>
+          <span class="prayer-time">Аср <span id="asr-time">--:--</span></span>
+          <span style="opacity:0.5">•</span>
+          <span class="prayer-time">Магриб <span id="maghrib-time">--:--</span></span>
+          <span style="opacity:0.5">•</span>
+          <span class="prayer-time">Иша <span id="isha-time">--:--</span></span>
         </div>
+        
         <p style="font-size:13px; margin-bottom:12px; color:var(--tl);">
-          Точное время по вашим координатам • компас Киблы • уведомления
+          Автоматически с Namaz Chelyabinsk • компас Киблы • уведомления
         </p>
+        
         <a href="https://namaz-drab.vercel.app/" target="_blank" rel="noopener"
            style="display:inline-block; padding:12px 24px; background:var(--p); color:white; 
                   text-decoration:none; border-radius:10px; font-weight:600; font-size:15px;">
           Открыть точное расписание →
         </a>
+        
         <p style="font-size:11px; color:var(--tl); margin-top:10px;">
           💡 При подключении вашей мечети расписание будет встроено в приложение
         </p>
       </div>
       
-      <!-- Уроки (оставляем как было) -->
+      <!-- Уроки -->
       <div class="card">
         <h3>📚 Расписание уроков</h3>
         <div id="lessons-list">
@@ -162,7 +174,7 @@
       <div id="ann-list"><div class="card" style="text-align:center;">📢 Загрузка...</div></div>
     </section>
 
-    <!-- 🔹 3. ПЯТНИЧНАЯ ХУТБА (НОВОЕ) -->
+    <!-- 🔹 3. ПЯТНИЧНАЯ ХУТБА -->
     <section id="khutbah" class="section">
       <div class="card" style="background:#E8F5E9; border:1px solid #4CAF50;">
         <h3 style="color:#2E7D32; margin:0;">📖 Пятничная хутба</h3>
@@ -174,7 +186,7 @@
       </div>
     </section>
 
-    <!-- 🔹 4. ВОЛОНТЁРЫ (бывшие "Мастера") -->
+    <!-- 🔹 4. ВОЛОНТЁРЫ -->
     <section id="ms" class="section">
       <div class="card" style="background:#E8F5E9; border:1px solid #4CAF50;">
         <h3 style="color:#2E7D32; margin:0;">🤝 Садака Джария своими руками</h3>
@@ -226,24 +238,7 @@
       </div>
     </section>
 
-    <!-- 🔹 6. ПОЖЕРТВОВАНИЯ -->
-    <section id="don" class="section">
-      <div class="card">
-        <h3>💝 Садака / Закят</h3>
-        <form onsubmit="sub(event, 'donations')">
-          <div class="form-group"><label>Ваше имя</label><input type="text" name="name" class="form-control" placeholder="Аноним"></div>
-          <div class="form-group"><label>Телефон</label><input type="tel" name="phone" class="form-control" required></div>
-          <div class="form-group"><label>Сумма (₽)</label><input type="number" name="amount" class="form-control" min="10" required></div>
-          <div class="form-group"><label>Тип</label>
-            <select name="type" class="form-control"><option>Садака</option><option>Закят</option><option>На ремонт</option><option>Закят аль-Фитр</option></select>
-          </div>
-          <div class="checkbox-group"><input type="checkbox" required><label>Согласен на обработку данных</label></div>
-          <button type="submit" class="btn btn-primary">🤲 Отправить</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- 🔹 7. НИКАХ — СКРЫТАЯ ФОРМА (доступна по ?nikah=1) -->
+    <!-- 🔹 6. НИКАХ — СКРЫТАЯ ФОРМА (доступна по ?nikah=1) -->
     <div id="nikah-form" class="hidden" style="padding:20px; background:var(--w); margin:20px; border-radius:12px; border:1px solid var(--b);">
       <h3 style="color:var(--p); margin-bottom:15px; text-align:center;">💍 Заявка на Никах</h3>
       <form onsubmit="sub(event, 'nikahs')">
@@ -419,7 +414,6 @@
       render(); 
       updateContacts(); 
       
-      // Если расписание — активная вкладка, прокрутить к редиректу
       if (document.getElementById('sched').classList.contains('active')) {
         setTimeout(() => {
           document.querySelector('#sched .card')?.scrollIntoView({behavior:'smooth', block:'start'});
@@ -432,7 +426,8 @@
       navigator.serviceWorker.register('/sw-user.js').catch(err => console.log('SW registration failed:', err));
     }
   </script>
-  <!-- Модуль расписания намазов -->
-<script src="js/prayer-times.js"></script>
+  
+  <!-- 🔹 Модуль расписания намазов (загружает данные с GitHub) -->
+  <script src="js/prayer-times.js"></script>
 </body>
 </html>
