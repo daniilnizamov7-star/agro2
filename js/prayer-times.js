@@ -16,25 +16,40 @@ const PrayerTimes = {
   getToday(data) {
     const today = new Date();
     const currentDay = today.getDate();
+    const currentMonth = today.getMonth(); // 0-11
     
-    // Ищем день в расписании (d: 1, 2, 3...)
-    const entry = data.schedule?.find(item => item.d === currentDay);
+    // Месяцы для сравнения
+    const monthNames = [
+      'янв', 'фев', 'мар', 'апр', 'май', 'июн',
+      'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'
+    ];
+    
+    const todayMonthStr = monthNames[currentMonth];
+    const todayStr = `${currentDay} ${todayMonthStr}`;
+    
+    // Ищем по дате (например, "20 апр")
+    const entry = data.schedule?.find(item => {
+      const itemDate = item.date?.trim();
+      return itemDate === todayStr;
+    });
     
     if (entry) {
-      console.log(`✅ Найдено расписание на ${currentDay} ${data.monthName?.trim()}`);
+      console.log(`✅ Найдено расписание на ${todayStr} (${data.monthName?.trim()})`);
       return entry;
     }
     
-    // Если не нашли — берём первый день
-    console.warn('⚠️ День не найден, используем первый день месяца');
-    return data.schedule?.[0];
+    console.warn(`⚠️ Дата ${todayStr} не найдена в расписании`);
+    return null;
   },
 
   /**
    * Обновить интерфейс
    */
   renderUI(times) {
-    if (!times) return;
+    if (!times) {
+      console.warn('⚠️ Нет данных для отображения');
+      return;
+    }
     
     const elements = {
       'fajr-time': times.fajr?.trim(),
@@ -47,7 +62,6 @@ const PrayerTimes = {
     for (const [id, time] of Object.entries(elements)) {
       const el = document.getElementById(id);
       if (el && time) {
-        // Плавное обновление
         el.style.transition = 'opacity 0.2s';
         el.style.opacity = '0';
         setTimeout(() => {
@@ -57,7 +71,6 @@ const PrayerTimes = {
       }
     }
     
-    // Подсветка следующего намаза
     this.highlightNext(times);
   },
 
@@ -76,12 +89,10 @@ const PrayerTimes = {
       { id: 'isha-time', time: times.isha?.trim() }
     ];
 
-    // Убираем старую подсветку
     document.querySelectorAll('.prayer-time').forEach(el => {
       el.classList.remove('next-prayer');
     });
 
-    // Находим следующий
     for (const p of prayers) {
       if (!p.time) continue;
       const [h, m] = p.time.split(':').map(Number);
@@ -100,7 +111,6 @@ const PrayerTimes = {
    */
   async init() {
     try {
-      // Загружаем с ?t=... чтобы браузер не кэшировал
       const response = await fetch(this.apiUrl + '?t=' + Date.now());
       if (!response.ok) throw new Error('HTTP ' + response.status);
       
@@ -108,44 +118,55 @@ const PrayerTimes = {
       const today = this.getToday(data);
       
       if (today) {
-        // Кэшируем
         localStorage.setItem(this.cacheKey, JSON.stringify({
           date: new Date().toDateString(),
           data: today
         }));
         
-        // Обновляем UI
         this.renderUI(today);
+      } else {
+        // Пробуем кэш
+        const cached = localStorage.getItem(this.cacheKey);
+        if (cached) {
+          const { date, data: cachedData } = JSON.parse(cached);
+          if (date === new Date().toDateString()) {
+            console.log('✅ Загружено из кэша');
+            this.renderUI(cachedData);
+            return;
+          }
+        }
+        
+        // Запасные данные
+        this.renderUI({
+          fajr: '04:00',
+          dhuhr: '13:20',
+          asr: '18:28',
+          maghrib: '20:08',
+          isha: '21:48'
+        });
       }
       
     } catch (error) {
       console.error('❌ Ошибка загрузки расписания:', error);
       
-      // Пробуем загрузить из кэша
       const cached = localStorage.getItem(this.cacheKey);
       if (cached) {
-        const { date, data } = JSON.parse(cached);
-        if (date === new Date().toDateString()) {
-          console.log('✅ Загружено из кэша');
-          this.renderUI(data);
-          return;
-        }
+        const { data: cachedData } = JSON.parse(cached);
+        this.renderUI(cachedData);
+        return;
       }
       
-      // Запасные данные
-      console.warn('⚠️ Используем запасное расписание');
       this.renderUI({
-        fajr: '04:05',
+        fajr: '04:00',
         dhuhr: '13:20',
-        asr: '18:24',
-        maghrib: '20:04',
-        isha: '21:44'
+        asr: '18:28',
+        maghrib: '20:08',
+        isha: '21:48'
       });
     }
   }
 };
 
-// Автозапуск
 document.addEventListener('DOMContentLoaded', () => {
   PrayerTimes.init();
 });
