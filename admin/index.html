@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#1E5631">
   <title>⚙️ MasjidFlow — Админ-панель</title>
   
-  <!-- PWA Manifest для админа -->
-  <link rel="manifest" href="manifest-admin.json">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   
   <style>
@@ -67,6 +67,40 @@
     .upload-area input { display: none; }
     .preview-img { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 15px; box-shadow: var(--sh); }
 
+    /* 🔹 Стили для расписания намазов (как у прихожанина) */
+    .prayer-card {
+      border: 2px solid var(--a);
+      background: #FFFBF0;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .prayer-card h3 {
+      color: #8B7500;
+      margin-bottom: 15px;
+    }
+    .prayer-times-grid {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin: 15px 0;
+      font-weight: 600;
+      color: var(--p);
+      flex-wrap: wrap;
+    }
+    .prayer-time {
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+    .prayer-time.next-prayer {
+      background: var(--a);
+      color: #111;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+    }
+
     @media (max-width: 768px) {
       .side { transform: translateX(-100%); }
       .side.open { transform: translateX(0); }
@@ -82,17 +116,13 @@
     <ul class="nav">
       <li><button class="active" onclick="tab('dash', this)"><i>📊</i> Обзор</button></li>
       <li><button onclick="tab('imp', this)"><i>📢</i> Важное</button></li>
-      <!-- 🔹 ХУТБА ДОБАВЛЕНА -->
       <li><button onclick="tab('khutbah', this)"><i>📖</i> Хутба</button></li>
-      <li><button onclick="tab('sched', this)"><i>🕌</i> Расписание</button></li>
-      <!-- 🔹 ИФТАР СКРЫТ ДО РАМАДАНА -->
+      <li><button onclick="tab('sched', this)"><i>📚</i> Уроки</button></li>
+      <!-- 🔹 Ифтар скрыт до Рамадана -->
       <!-- <li><button onclick="tab('ift', this)" disabled style="opacity:0.5; cursor:not-allowed;"><i>🍽️</i> Ифтар</button></li> -->
-      <!-- 🔹 "Мастера (Приват)" → "Волонтёры" -->
       <li><button onclick="tab('ms', this)"><i>🤝</i> Волонтёры</button></li>
       <li><button onclick="tab('aid', this)"><i>🤲</i> Благотворительность</button></li>
       <li><button onclick="tab('don', this)"><i>💰</i> Пожертвования</button></li>
-      <!-- 🔹 НИКАХ УБРАН ИЗ НАВИГАЦИИ (остался в БД для обработки) -->
-      <!-- <li><button onclick="tab('nik', this)"><i>💍</i> Никахи</button></li> -->
       <li><button onclick="tab('settings', this)"><i>⚙️</i> Настройки</button></li>
     </ul>
   </aside>
@@ -104,14 +134,35 @@
       <div style="font-weight:600;">Имам</div>
     </div>
 
-    <!-- 1. DASHBOARD -->
+    <!-- 🔹 1. DASHBOARD — С РАСПИСАНИЕМ НАМАЗОВ -->
     <section id="dash" class="sec active">
+      <!-- Расписание намазов (как у прихожанина) -->
+      <div class="prayer-card">
+        <h3>🕋 Время намазов на сегодня</h3>
+        <div class="prayer-times-grid">
+          <span class="prayer-time">Фаджр <span id="fajr-time">--:--</span></span>
+          <span style="opacity:0.5">•</span>
+          <span class="prayer-time">Зухр <span id="dhuhr-time">--:--</span></span>
+          <span style="opacity:0.5">•</span>
+          <span class="prayer-time">Аср <span id="asr-time">--:--</span></span>
+          <span style="opacity:0.5">•</span>
+          <span class="prayer-time">Магриб <span id="maghrib-time">--:--</span></span>
+          <span style="opacity:0.5">•</span>
+          <span class="prayer-time">Иша <span id="isha-time">--:--</span></span>
+        </div>
+        <p style="font-size:12px; color:var(--tl); margin-top:10px;">
+          Автоматически с Namaz Chelyabinsk
+        </p>
+      </div>
+
+      <!-- Статистика -->
       <div class="grid">
         <div class="stat"><h3>Пожертвования</h3><div class="val" id="s-don">0</div></div>
         <div class="stat"><h3>Заявки Никах</h3><div class="val" id="s-nik">0</div></div>
         <div class="stat"><h3>Записи Ифтар</h3><div class="val" id="s-ift">0</div></div>
         <div class="stat"><h3>Запросы помощи</h3><div class="val" id="s-aid">0</div></div>
       </div>
+      
       <div class="wrap"><h3>📢 Последние действия</h3><div id="log" style="color:var(--tl);">Загрузка...</div></div>
     </section>
 
@@ -123,7 +174,7 @@
       </div>
     </section>
 
-    <!-- 🔹 3. ПЯТНИЧНАЯ ХУТБА (НОВОЕ) -->
+    <!-- 3. ХУТБА -->
     <section id="khutbah" class="sec">
       <div class="wrap">
         <div class="head">
@@ -136,26 +187,15 @@
       </div>
     </section>
 
-    <!-- 4. РАСПИСАНИЕ (ФОТО + УРОКИ) -->
+    <!-- 🔹 4. РАСПИСАНИЕ — ТОЛЬКО УРОКИ -->
     <section id="sched" class="sec">
       <div class="wrap">
-        <div class="head"><h3>🕌 Фото расписания намазов</h3></div>
-        <div class="upload-area" onclick="document.getElementById('schedule-upload').click()">
-          <input type="file" id="schedule-upload" accept="image/*">
-          <div id="upload-text">📷 Нажмите чтобы загрузить фото<br><small>PNG, JPG до 5MB</small></div>
-          <img id="schedule-preview" class="preview-img" style="display:none;">
-        </div>
-        <button class="btn btn-p" style="margin-top:15px; width:100%;" onclick="saveScheduleImage()">💾 Сохранить расписание</button>
-        <p style="margin-top:10px; font-size:13px; color:var(--tl);">Фото мгновенно появится на сайте в разделе «Расписание».</p>
-      </div>
-
-      <div class="wrap" style="margin-top:20px;">
         <div class="head"><h3>📚 Расписание уроков</h3><button class="btn btn-p" onclick="openM('m-lesson')">➕ Добавить урок</button></div>
         <table><thead><tr><th>Время</th><th>Название</th><th>День</th><th>Учитель</th><th></th></tr></thead><tbody id="t-lessons"></tbody></table>
       </div>
     </section>
 
-    <!-- 5. ИФТАР (скрыт, но функционал сохранён) -->
+    <!-- 5. ИФТАР -->
     <section id="ift" class="sec">
       <div class="wrap">
         <div class="head"><h3>🍽️ Записи на Ифтар</h3><button class="btn btn-d" onclick="clear('mf_iftar')">🗑 Очистить</button></div>
@@ -163,7 +203,7 @@
       </div>
     </section>
 
-    <!-- 🔹 6. ВОЛОНТЁРЫ (бывшие "Мастера") -->
+    <!-- 6. ВОЛОНТЁРЫ -->
     <section id="ms" class="sec">
       <div class="wrap">
         <div class="head"><h3>🤝 Волонтёры общины</h3><button class="btn btn-d" onclick="clear('mf_masters')">🗑 Очистить</button></div>
@@ -187,15 +227,7 @@
       </div>
     </section>
 
-    <!-- 9. НИКАХИ (скрыт из навигации, но доступен для обработки) -->
-    <section id="nik" class="sec">
-      <div class="wrap">
-        <div class="head"><h3>💍 Заявки на Никах (только для имама)</h3></div>
-        <table><thead><tr><th>Пара</th><th>Дата</th><th>Телефон</th><th>Статус</th></tr></thead><tbody id="t-nik"></tbody></table>
-      </div>
-    </section>
-
-    <!-- 10. НАСТРОЙКИ -->
+    <!-- 9. НАСТРОЙКИ -->
     <section id="settings" class="sec">
       <div class="wrap" style="max-width:600px;">
         <div class="head"><h3>⚙️ Настройки мечети</h3></div>
@@ -241,7 +273,7 @@
     </div>
   </div>
 
-  <!-- 🔹 Modal: Khutbah -->
+  <!-- Modal: Khutbah -->
   <div id="m-khutbah" class="modal">
     <div class="modal-c">
       <button class="modal-x" onclick="closeM('m-khutbah')">&times;</button>
@@ -284,46 +316,6 @@
       set: (k, v) => { localStorage.setItem(k, JSON.stringify(v)); render(); }
     };
     const fmt = d => new Date(d).toLocaleDateString('ru-RU');
-
-    // === SCHEDULE IMAGE ===
-    let tempImageBase64 = '';
-    document.getElementById('schedule-upload').addEventListener('change', function(e) {
-      const file = e.target.files[0]; if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        tempImageBase64 = ev.target.result;
-        document.getElementById('schedule-preview').src = tempImageBase64;
-        document.getElementById('schedule-preview').style.display = 'block';
-        document.getElementById('upload-text').innerHTML = '✅ Фото выбрано. Нажмите «Сохранить»';
-      };
-      reader.readAsDataURL(file);
-    });
-    function saveScheduleImage() {
-      if(!tempImageBase64 && !localStorage.getItem('mf_schedule_image')) return alert('Сначала выберите фото');
-      if(tempImageBase64) {
-          localStorage.setItem('mf_schedule_image', tempImageBase64);
-          localStorage.setItem('mf_schedule_date', new Date().toISOString());
-          alert('✅ Расписание сохранено и опубликовано!');
-          render();
-      }
-    }
-
-    // === LESSONS ===
-    function saveLesson(e) {
-      e.preventDefault();
-      const lesson = {
-        id: Date.now(),
-        title: document.getElementById('l-title').value,
-        teacher: document.getElementById('l-teacher').value,
-        day: document.getElementById('l-day').value,
-        time: document.getElementById('l-time').value
-      };
-      const arr = DB.get('mf_lessons');
-      arr.push(lesson);
-      DB.set('mf_lessons', arr);
-      closeM('m-lesson');
-      e.target.reset();
-    }
 
     // === SETTINGS ===
     function loadSettings() {
@@ -377,6 +369,23 @@
       return div.innerHTML;
     }
 
+    // === LESSONS ===
+    function saveLesson(e) {
+      e.preventDefault();
+      const lesson = {
+        id: Date.now(),
+        title: document.getElementById('l-title').value,
+        teacher: document.getElementById('l-teacher').value,
+        day: document.getElementById('l-day').value,
+        time: document.getElementById('l-time').value
+      };
+      const arr = DB.get('mf_lessons');
+      arr.push(lesson);
+      DB.set('mf_lessons', arr);
+      closeM('m-lesson');
+      e.target.reset();
+    }
+
     // === RENDER ===
     function render() {
       const don = DB.get('mf_donations'), nik = DB.get('mf_nikahs'), ift = DB.get('mf_iftar'), aid = DB.get('mf_aid'), ms = DB.get('mf_masters');
@@ -411,13 +420,6 @@
           <button onclick="del('mf_announcements',${a.id})" style="background:none; border:none; color:red; cursor:pointer; font-size:12px;">Удалить</button>
         </div>
       `).join('');
-
-      const schedImg = localStorage.getItem('mf_schedule_image');
-      if (schedImg && !document.getElementById('schedule-preview').src.includes('http')) {
-          document.getElementById('schedule-preview').src = schedImg;
-          document.getElementById('schedule-preview').style.display = 'block';
-          document.getElementById('upload-text').innerHTML = '✅ Расписание загружено. Замените при необходимости.';
-      }
     }
 
     function renderT(id, data, tpl) {
@@ -441,7 +443,7 @@
     document.addEventListener('DOMContentLoaded', () => { 
       render(); 
       loadSettings(); 
-      loadKhutbah(); // 🔹 Загружаем хутбу при старте
+      loadKhutbah();
     });
 
     // === SERVICE WORKER (PWA) ===
@@ -449,5 +451,8 @@
       navigator.serviceWorker.register('/sw-admin.js').catch(err => console.log('SW registration failed:', err));
     }
   </script>
+  
+  <!-- 🔹 Модуль расписания намазов (тот же что у прихожанина) -->
+  <script src="js/prayer-times.js"></script>
 </body>
 </html>
