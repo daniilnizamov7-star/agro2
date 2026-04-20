@@ -92,6 +92,19 @@
       border-radius: 20px; font-weight: 600; cursor: pointer;
     }
     @keyframes slideUp { from { transform: translateX(-50%) translateY(20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+    /* Подсветка следующего намаза */
+.prayer-time {
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.prayer-time.next-prayer {
+  background: var(--a);
+  color: #111;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(212,175,55,0.4);
+}
   </style>
 </head>
 <body>
@@ -419,5 +432,7 @@
       navigator.serviceWorker.register('/sw-user.js').catch(err => console.log('SW registration failed:', err));
     }
   </script>
+  <!-- Модуль расписания намазов -->
+<script src="js/prayer-times.js"></script>
 </body>
 </html>
